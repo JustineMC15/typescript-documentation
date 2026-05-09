@@ -56,12 +56,30 @@ function readTask (list: task[]): void {
     console.log("No tasks added yet.")
     return
     }
-    console.log(list)
+    for (let i = 0; i < list.length; i++) {
+    console.log(`${i} | ${list[i].taskTitle} | ${list[i].taskDescription} | ${list[i].taskDeadline}`)
+    }
 }
 // Update Function
 
 // Delete Function
-
+async function deleteTask(list: task[]): Promise<void> {
+    if (list.length === 0){
+    console.log("No tasks added yet.")
+    return
+    }
+    for (let i = 0; i < list.length; i++) {
+    console.log(`${i} | ${list[i].taskTitle}`)
+    }
+    const deleteChoice = await ask("Select which task to remove via index")
+    const index = parseInt(deleteChoice)
+    if (index < 0 || index >= list.length) {
+        console.log("Invalid index!")
+    return;
+    }
+    list.splice(index, 1)
+    saveToFile(list)
+}
 // Main Menu
 async function main(): Promise<void> {
     const list = loadFromFile()
@@ -79,7 +97,7 @@ do {
         case 'C': await createTask(list); break;
         case 'R': readTask(list); break;
         // case 'U': await updateTask(list); break; 
-        // case 'D': await deleteTask(list): break;
+        case 'D': await deleteTask(list); break;
         case 'E': saveToFile(list); console.log("Exiting..."); rl.close();  break; 
         default: console.log("Invalid choice!")
     }
