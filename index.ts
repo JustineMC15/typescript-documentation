@@ -4,7 +4,6 @@ const rl = readline.createInterface({
     input: process.stdin, 
     output: process.stdout 
 })
-
 function ask(question: string): Promise<string> {
     return new Promise(resolve => rl.question(question, resolve))
 }
@@ -30,7 +29,7 @@ function loadFromFile(): task[] {
 function saveToFile(list: task[]): void {
     const data = JSON.stringify(list, null, 2)
     fs.writeFileSync('tasklist.txt', data)
-    console.log("Data saved successfully.")
+    console.log("Data saved successfully.") 
 }
 
 // CRUD
@@ -60,5 +59,30 @@ function readTask (list: task[]): void {
     console.log(list)
 }
 // Update Function
+
 // Delete Function
+
 // Main Menu
+async function main(): Promise<void> {
+    const list = loadFromFile()
+let choice = ' '
+do {
+    console.log("Tasklist")
+    console.log("[C] Create")
+    console.log("[R] Read")
+    console.log("[U] Update")
+    console.log("[D] Delete")
+    console.log("[E] Exit")
+    choice = (await ask("Enter choice")).toUpperCase()
+
+    switch (choice) {
+        case 'C': await createTask(list); break;
+        case 'R': readTask(list); break;
+        // case 'U': await updateTask(list); break; 
+        // case 'D': await deleteTask(list): break;
+        case 'E': saveToFile(list); console.log("Exiting..."); rl.close();  break; 
+        default: console.log("Invalid choice!")
+    }
+} while (choice !=='E'); 
+}
+main()
