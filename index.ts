@@ -69,7 +69,7 @@ async function updateTask(list: task[]): Promise<void> {
     for (let i = 0; i < list.length; i++) {
     console.log(`${i} | ${list[i].taskTitle}`)
     }
-    const updateChoice = await ask("Select which task to update via index")
+    const updateChoice = await ask("Select which task to update via index: ")
     const index = parseInt(updateChoice)
     if (index < 0 || index >= list.length) {
         console.log("Invalid index!")
@@ -99,7 +99,7 @@ async function deleteTask(list: task[]): Promise<void> {
     for (let i = 0; i < list.length; i++) {
     console.log(`${i} | ${list[i].taskTitle}`)
     }
-    const deleteChoice = await ask("Select which task to remove via index")
+    const deleteChoice = await ask("Select which task to remove via index: ")
     const index = parseInt(deleteChoice)
     if (index < 0 || index >= list.length) {
         console.log("Invalid index!")
@@ -107,6 +107,7 @@ async function deleteTask(list: task[]): Promise<void> {
     }
     list.splice(index, 1)
     saveToFile(list)
+    console.log("Task deleted successfully.")
 }
 // Main Menu
 async function main(): Promise<void> {
