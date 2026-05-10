@@ -77,8 +77,9 @@ function readTask (list: task[]): void {
     console.log("No tasks added yet.")
     return
     }
+    console.log("Index | Title | Description | Deadline | Completion")
     for (let i = 0; i < list.length; i++) {
-    console.log(`${i} | ${list[i].taskTitle} | ${list[i].taskDescription} | ${list[i].taskDeadline}`)
+    console.log(`${i} | ${list[i].taskTitle} | ${list[i].taskDescription} | ${list[i].taskDeadline} | ${list[i].taskCompletion}`)
     }
 }
 // Update Function
@@ -118,7 +119,7 @@ async function updateTask(list: task[]): Promise<void> {
         taskTitle,
         taskDescription,
         taskDeadline,
-        taskCompletion: false
+        taskCompletion: list[index].taskCompletion
     }
 
     list[index] = newTask
@@ -144,6 +145,26 @@ async function deleteTask(list: task[]): Promise<void> {
     saveToFile(list)
     console.log("Task deleted successfully.")
 }
+// Complete Task Function
+
+async function completeTask(list: task[]): Promise<void> {
+    if (list.length === 0){
+    console.log("No tasks added yet.")
+    return
+    }
+    for (let i = 0; i < list.length; i++) {
+    console.log(`${i} | ${list[i].taskTitle}`)
+    }
+    const completeChoice = await ask("Select which task to complete via index: ")
+    const index = parseInt(completeChoice)
+    if (isNaN(index) || index < 0 || index >= list.length) {
+        console.log("Invalid index!")
+    return;
+    }
+    list[index].taskCompletion = true;
+    saveToFile(list)
+    console.log("Task completed successfully.")
+}
 // Main Menu
 async function main(): Promise<void> {
     const list = loadFromFile()
@@ -154,6 +175,7 @@ do {
     console.log("[R] Read")
     console.log("[U] Update")
     console.log("[D] Delete")
+    console.log("[T] Task Complete")
     console.log("[E] Exit")
     choice = (await ask("Enter choice: ")).toUpperCase()
 
@@ -162,6 +184,7 @@ do {
         case 'R': readTask(list); break;
         case 'U': await updateTask(list); break; 
         case 'D': await deleteTask(list); break;
+        case 'T': await completeTask(list); break;
         case 'E': saveToFile(list); console.log("Exiting..."); rl.close();  break; 
         default: console.log("Invalid choice!")
     }
