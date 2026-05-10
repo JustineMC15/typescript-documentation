@@ -7,6 +7,7 @@ const rl = readline.createInterface({
 function ask(question: string): Promise<string> {
     return new Promise(resolve => rl.question(question, resolve))
 }
+
 // Interface structure
 interface task {
     taskTitle: string,
@@ -14,7 +15,13 @@ interface task {
     taskDeadline: string,
     taskCompletion: boolean
 }
-
+// Input Validation
+function validateString(input: string): boolean {
+    if (input.trim() === '' || input.length >= 50) {
+        return false;
+    }
+    return true;
+}
 // Data persistence
 function loadFromFile(): task[] {
     if (!fs.existsSync('tasklist.txt')) {
@@ -35,10 +42,24 @@ function saveToFile(list: task[]): void {
 // CRUD
 // Create Function
 async function createTask(list: task[]): Promise<void> {
-    const taskTitle = await ask("Enter task name: ")
-    const taskDescription = await ask("Enter task description: ")
-    const taskDeadline = await ask("Enter task deadline: ")
-
+    let taskTitle = ''
+    let taskDescription = ''
+    let taskDeadline = ''
+    while (true) {
+    taskTitle = await ask("Enter task name: ")
+    if (validateString(taskTitle)) break
+    console.log("Invalid! Must not be empty or exceed 50 characters.")
+    }
+    while (true) {
+    taskDescription = await ask("Enter task description: ")
+    if (validateString(taskDescription)) break
+    console.log("Invalid! Must not be empty or exceed 50 characters.")
+    }
+    while (true) {
+    taskDeadline = await ask("Enter task deadline: ")
+    if (validateString(taskDeadline)) break
+    console.log("Invalid! Must not be empty or exceed 50 characters.")
+    }
     const newTask: task = {
         taskTitle,
         taskDescription,
@@ -71,14 +92,28 @@ async function updateTask(list: task[]): Promise<void> {
     }
     const updateChoice = await ask("Select which task to update via index: ")
     const index = parseInt(updateChoice)
-    if (index < 0 || index >= list.length) {
+    if (isNaN(index) || index < 0 || index >= list.length) {
         console.log("Invalid index!")
     return;
     }
-    const taskTitle = await ask("Enter task name: ")
-    const taskDescription = await ask("Enter task description: ")
-    const taskDeadline = await ask("Enter task deadline: ")
-
+    let taskTitle = ''
+    let taskDescription = ''
+    let taskDeadline = ''
+    while (true) {
+    taskTitle = await ask("Enter task name: ")
+    if (validateString(taskTitle)) break
+    console.log("Invalid! Must not be empty or exceed 50 characters.")
+    }
+    while (true) {
+    taskDescription = await ask("Enter task description: ")
+    if (validateString(taskDescription)) break
+    console.log("Invalid! Must not be empty or exceed 50 characters.")
+    }
+    while (true) {
+    taskDeadline = await ask("Enter task deadline: ")
+    if (validateString(taskDeadline)) break
+    console.log("Invalid! Must not be empty or exceed 50 characters.")
+    }
     const newTask: task = {
         taskTitle,
         taskDescription,
@@ -101,7 +136,7 @@ async function deleteTask(list: task[]): Promise<void> {
     }
     const deleteChoice = await ask("Select which task to remove via index: ")
     const index = parseInt(deleteChoice)
-    if (index < 0 || index >= list.length) {
+    if (isNaN(index) || index < 0 || index >= list.length) {
         console.log("Invalid index!")
     return;
     }
