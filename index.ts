@@ -61,7 +61,35 @@ function readTask (list: task[]): void {
     }
 }
 // Update Function
+async function updateTask(list: task[]): Promise<void> {
+    if (list.length === 0){
+    console.log("No tasks added yet.")
+    return
+    }
+    for (let i = 0; i < list.length; i++) {
+    console.log(`${i} | ${list[i].taskTitle}`)
+    }
+    const updateChoice = await ask("Select which task to update via index")
+    const index = parseInt(updateChoice)
+    if (index < 0 || index >= list.length) {
+        console.log("Invalid index!")
+    return;
+    }
+    const taskTitle = await ask("Enter task name: ")
+    const taskDescription = await ask("Enter task description: ")
+    const taskDeadline = await ask("Enter task deadline: ")
 
+    const newTask: task = {
+        taskTitle,
+        taskDescription,
+        taskDeadline,
+        taskCompletion: false
+    }
+
+    list[index] = newTask
+    saveToFile(list)
+    console.log("Task updated successfully.")
+}
 // Delete Function
 async function deleteTask(list: task[]): Promise<void> {
     if (list.length === 0){
@@ -91,12 +119,12 @@ do {
     console.log("[U] Update")
     console.log("[D] Delete")
     console.log("[E] Exit")
-    choice = (await ask("Enter choice")).toUpperCase()
+    choice = (await ask("Enter choice: ")).toUpperCase()
 
     switch (choice) {
         case 'C': await createTask(list); break;
         case 'R': readTask(list); break;
-        // case 'U': await updateTask(list); break; 
+        case 'U': await updateTask(list); break; 
         case 'D': await deleteTask(list); break;
         case 'E': saveToFile(list); console.log("Exiting..."); rl.close();  break; 
         default: console.log("Invalid choice!")
