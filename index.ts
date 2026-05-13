@@ -9,7 +9,8 @@ function ask(question: string): Promise<string> {
 }
 
 // Interface structure
-interface task {
+interface Task {
+    id: string,
     taskTitle: string,
     taskDescription: string,
     taskDeadline: string,
@@ -23,151 +24,153 @@ function validateString(input: string): boolean {
     return true;
 }
 // Data persistence
-function loadFromFile(): task[] {
+function loadFromFile(): { [id: string]: Task }{
     if (!fs.existsSync('tasklist.txt')) {
         console.log("No tasklist data found, starting fresh.")
-        return []
+        return {}
     }
     const data = fs.readFileSync('tasklist.txt', 'utf-8')
-    if (data.trim() === '') return [] 
+    if (data.trim() === '') return {} 
     return JSON.parse(data)
 }
 
-function saveToFile(list: task[]): void {
-    const data = JSON.stringify(list, null, 2)
+function saveToFile(store: { [id: string]: Task }): void {
+    const data = JSON.stringify(store, null, 2)
     fs.writeFileSync('tasklist.txt', data)
     console.log("Data saved successfully.") 
 }
 
 // CRUD
 // Create Function
-async function createTask(list: task[]): Promise<void> {
+async function createTask(store: { [id: string]: Task }): Promise<void> {
     let taskTitle = ''
     let taskDescription = ''
     let taskDeadline = ''
     while (true) {
-    taskTitle = await ask("Enter task name: ")
+    taskTitle = await ask("Enter Task name: ")
     if (validateString(taskTitle)) break
     console.log("Invalid! Must not be empty or exceed 50 characters.")
     }
     while (true) {
-    taskDescription = await ask("Enter task description: ")
+    taskDescription = await ask("Enter Task description: ")
     if (validateString(taskDescription)) break
     console.log("Invalid! Must not be empty or exceed 50 characters.")
     }
     while (true) {
-    taskDeadline = await ask("Enter task deadline: ")
+    taskDeadline = await ask("Enter Task deadline: ")
     if (validateString(taskDeadline)) break
     console.log("Invalid! Must not be empty or exceed 50 characters.")
     }
-    const newTask: task = {
+    const newTask: Task = {
+        id: Date.now().toString(),
         taskTitle,
         taskDescription,
         taskDeadline,
         taskCompletion: false
     }
-
-    list.push(newTask)
-    saveToFile(list)
+    store[newTask.id] = newTask
+    saveToFile(store)
     console.log("Task created successfully.")
 }
 // Read Function
-function readTask (list: task[]): void {
-    if (list.length === 0){
+function readTask (store: { [id: string]: Task }): void {
+    if (Object.keys(store).length === 0){
     console.log("No tasks added yet.")
     return
     }
-    console.log("Index | Title | Description | Deadline | Completion")
-    for (let i = 0; i < list.length; i++) {
-    console.log(`${i} | ${list[i].taskTitle} | ${list[i].taskDescription} | ${list[i].taskDeadline} | ${list[i].taskCompletion}`)
+    console.log("ID | Title | Description | Deadline | Completion")
+    for (const id of Object.keys(store)) {
+    console.log(`${id} | ${store[id].taskTitle} | ${store[id].taskDescription} | ${store[id].taskDeadline} | ${store[id].taskCompletion}`)
     }
 }
 // Update Function
-async function updateTask(list: task[]): Promise<void> {
-    if (list.length === 0){
+async function updateTask(store: { [id: string]: Task }): Promise<void> {
+    if (Object.keys(store).length === 0){
     console.log("No tasks added yet.")
     return
     }
-    for (let i = 0; i < list.length; i++) {
-    console.log(`${i} | ${list[i].taskTitle}`)
-    }
-    const updateChoice = await ask("Select which task to update via index: ")
-    const index = parseInt(updateChoice)
-    if (isNaN(index) || index < 0 || index >= list.length) {
-        console.log("Invalid index!")
-    return;
-    }
+    readTask(store);
+    const id = await ask("Select which Task to remove via id: ")
+    if (!store[id]) {
+    console.log("Task not found!")
+    return}
     let taskTitle = ''
     let taskDescription = ''
     let taskDeadline = ''
     while (true) {
-    taskTitle = await ask("Enter task name: ")
+    taskTitle = await ask("Enter Task name: ")
     if (validateString(taskTitle)) break
     console.log("Invalid! Must not be empty or exceed 50 characters.")
     }
     while (true) {
-    taskDescription = await ask("Enter task description: ")
+    taskDescription = await ask("Enter Task description: ")
     if (validateString(taskDescription)) break
     console.log("Invalid! Must not be empty or exceed 50 characters.")
     }
     while (true) {
-    taskDeadline = await ask("Enter task deadline: ")
+    taskDeadline = await ask("Enter Task deadline: ")
     if (validateString(taskDeadline)) break
     console.log("Invalid! Must not be empty or exceed 50 characters.")
     }
-    const newTask: task = {
+    const newTask: Task = {
+        id,
         taskTitle,
         taskDescription,
         taskDeadline,
-        taskCompletion: list[index].taskCompletion
+        taskCompletion: store[id].taskCompletion
     }
-
-    list[index] = newTask
-    saveToFile(list)
+    store[id] = newTask
+    saveToFile(store)
     console.log("Task updated successfully.")
 }
 // Delete Function
-async function deleteTask(list: task[]): Promise<void> {
-    if (list.length === 0){
+async function deleteTask(store: { [id: string]: Task }): Promise<void> {
+    if (Object.keys(store).length === 0){
     console.log("No tasks added yet.")
     return
     }
-    for (let i = 0; i < list.length; i++) {
-    console.log(`${i} | ${list[i].taskTitle}`)
-    }
-    const deleteChoice = await ask("Select which task to remove via index: ")
-    const index = parseInt(deleteChoice)
-    if (isNaN(index) || index < 0 || index >= list.length) {
-        console.log("Invalid index!")
-    return;
-    }
-    list.splice(index, 1)
-    saveToFile(list)
+    readTask(store);
+    const id = await ask("Select which Task to remove via id: ")
+    if (!store[id]) {
+    console.log("Task not found!")
+    return}
+    delete store[id]
+    saveToFile(store)
     console.log("Task deleted successfully.")
 }
 // Complete Task Function
 
-async function completeTask(list: task[]): Promise<void> {
-    if (list.length === 0){
+async function completeTask(store: { [id: string]: Task }): Promise<void> {
+    if (Object.keys(store).length === 0){
     console.log("No tasks added yet.")
     return
     }
-    for (let i = 0; i < list.length; i++) {
-    console.log(`${i} | ${list[i].taskTitle}`)
-    }
-    const completeChoice = await ask("Select which task to complete via index: ")
-    const index = parseInt(completeChoice)
-    if (isNaN(index) || index < 0 || index >= list.length) {
-        console.log("Invalid index!")
-    return;
-    }
-    list[index].taskCompletion = true;
-    saveToFile(list)
+    readTask(store);
+    const id = await ask("Select which Task to remove via id: ")
+    if (!store[id]) {
+    console.log("Task not found!")
+    return}
+    store[id].taskCompletion = true;
+    saveToFile(store)
     console.log("Task completed successfully.")
+}
+// Search Function
+async function searchTask(store: { [id: string]: Task }): Promise<void> {
+    if (Object.keys(store).length === 0){
+    console.log("No tasks added yet.")
+    return
+    }
+    const searchId = await ask ("Please enter ID of task you want to search")
+    if (!store[searchId]) {
+        console.log ("No matches found")
+    return
+    }
+    const t = store[searchId]
+    console.log(`${t.id} | ${t.taskTitle} | ${t.taskDescription} | ${t.taskDeadline} | ${t.taskCompletion}`)
 }
 // Main Menu
 async function main(): Promise<void> {
-    const list = loadFromFile()
+    const store = loadFromFile()
 let choice = ' '
 do {
     console.log("Tasklist")
@@ -180,12 +183,13 @@ do {
     choice = (await ask("Enter choice: ")).toUpperCase()
 
     switch (choice) {
-        case 'C': await createTask(list); break;
-        case 'R': readTask(list); break;
-        case 'U': await updateTask(list); break; 
-        case 'D': await deleteTask(list); break;
-        case 'T': await completeTask(list); break;
-        case 'E': saveToFile(list); console.log("Exiting..."); rl.close();  break; 
+        case 'C': await createTask(store); break;
+        case 'R': readTask(store); break;
+        case 'U': await updateTask(store); break; 
+        case 'D': await deleteTask(store); break;
+        case 'T': await completeTask(store); break;
+        case 'S': await searchTask(store); break;
+        case 'E': saveToFile(store); console.log("Exiting..."); rl.close();  break; 
         default: console.log("Invalid choice!")
     }
 } while (choice !=='E'); 
