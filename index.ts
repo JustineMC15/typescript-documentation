@@ -18,7 +18,7 @@ interface Task {
 }
 // Input Validation
 function validateString(input: string): boolean {
-    if (input.trim() === '' || input.length >= 50) {
+    if (input.trim() === '' || input.length <= 50) {
         return false;
     }
     return true;
@@ -90,7 +90,7 @@ async function updateTask(store: { [id: string]: Task }): Promise<void> {
     return
     }
     readTask(store);
-    const id = await ask("Select which Task to remove via id: ")
+    const id = await ask("Select which Task to update via id: ")
     if (!store[id]) {
     console.log("Task not found!")
     return}
@@ -146,7 +146,7 @@ async function completeTask(store: { [id: string]: Task }): Promise<void> {
     return
     }
     readTask(store);
-    const id = await ask("Select which Task to remove via id: ")
+    const id = await ask("Select which Task to complete via id: ")
     if (!store[id]) {
     console.log("Task not found!")
     return}
@@ -179,6 +179,7 @@ do {
     console.log("[U] Update")
     console.log("[D] Delete")
     console.log("[T] Task Complete")
+    console.log("[S] Search by ID")
     console.log("[E] Exit")
     choice = (await ask("Enter choice: ")).toUpperCase()
 
