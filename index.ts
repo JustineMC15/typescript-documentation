@@ -18,7 +18,7 @@ interface Task {
 }
 // Input Validation
 function validateString(input: string): boolean {
-    if (input.trim() === '' || input.length <= 50) {
+    if (input.trim() === '' || input.length >= 50) {
         return false;
     }
     return true;
